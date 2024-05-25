@@ -56,7 +56,7 @@ bootsect: $(BOOTSECT_OBJS)
 	$(LD) -m elf_i386 -o bin/bootsect.bin $^ -Ttext 0x7C00 --oformat=binary
 
 kernel: $(KERNEL_OBJS)
-	$(LD) -m elf_i386 -o bin/kernel.bin $^ -Tsrc/link.ld
+	$(LD) -m elf_i386 -o bin/kernel.bin $^ -Tsrc/linker.ld --oformat=binary
 
 hdd: bootsect kernel
 	dd if=/dev/zero of=upOS.hdd bs=512 count=2880

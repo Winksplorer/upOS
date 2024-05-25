@@ -1,7 +1,10 @@
 ; src/bootloader/stage0.S: upOS bootloader
 ; Licensed under the MIT license.
 
-[bits 16]
+; ===== this code is now decommisioned and is not in use because of cursed data between the bootloader and kernel. ===== ;
+
+[BITS 16]
+[extern PModeMain]
 [global _start]
 
 jmp _start
@@ -38,6 +41,13 @@ _start:
     ; Load the GDT
     lgdt [gdt]
 
+    mov ax, 0x10 ; 32-bit code data segment
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    mov ss, ax
+
     ; Set PE (Protection Enable) bit in CR0 (Control Register 0)
     mov eax, cr0 
     or al, 1
@@ -66,15 +76,18 @@ print_string:
 
 disk_error_msg: db 'Error reading disk. System halted.', 0
 
-BITS 32
+[BITS 32]
     
 PModeMain:
-    mov byte [0xB8000], 'A' ; trying to remember here
-    mov byte [0xB8001], 0x0A ; trying to remember here
-
     mov al, 'A'
     out 0xe9, al
-    jmp $
+
+    ;mov al, [0x10000]
+    ;out 0xe9, al
+
+    jmp 0x10010
+    ;jmp $
+    ;jmp 0x10:0x1000
 
 times 510 - ($ - $$) db 0
 dw 0xAA55
