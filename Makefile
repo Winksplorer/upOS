@@ -40,8 +40,11 @@ run:
 dirs:
 	mkdir -p bin
 
-clean:
+clean: clean_objs
 	rm -rf bin
+
+clean_objs: $(BOOTSECT_OBJS) $(KERNEL_OBJS)
+	rm $^
 
 %.o: %.c
 	$(CC) -o $@ -c $< $(CCFLAGS)
