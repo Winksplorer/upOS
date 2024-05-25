@@ -1,0 +1,1 @@
+dw 0xDEAD, 0xBEEF ; just to test
