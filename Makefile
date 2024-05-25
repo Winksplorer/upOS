@@ -2,29 +2,67 @@
 # Licensed under the MIT license.
 
 # Toolchain
+CC = gcc
 AS = nasm
 
+CCFLAGS = \
+	-g \
+	-O1 \
+	-m32 \
+	-std=c99 \
+	-Wall \
+	-Wextra \
+	-fno-pie \
+	-nostdlib \
+	-ffreestanding \
+	-fno-stack-protector
+
 ASFLAGS = \
-	-f bin
+	-f elf
+
+BOOTSECT_SRCS = \
+	src/bootloader/stage0.S
+
+BOOTSECT_OBJS = $(BOOTSECT_SRCS:.S=.o)
+
+KERNEL_C_SRCS = $(wildcard src/kernel/*.c)
+KERNEL_S_SRCS = $(filter-out $(BOOTSECT_SRCS), $(wildcard src/kernel/*.S))
+
+KERNEL_OBJS = $(KERNEL_C_SRCS:.c=.o) $(KERNEL_S_SRCS:.S=.o)
 
 IMAGE_NAME = upOS
 
-all: dirs build link run
+all: dirs hdd run
+
+run:
+	qemu-system-i386 -debugcon stdio -drive file=upOS.hdd,format=raw
 
 dirs:
 	mkdir -p bin
-	touch bin/bootloader.bin
-	touch bin/kernel.bin
-
-build:
-	$(AS) $(ASFLAGS) -o bin/bootloader.bin src/bootloader/stage0.S
-	$(AS) $(ASFLAGS) -o bin/kernel.bin src/kernel/entry.S
-
-link:
-	cat bin/bootloader.bin bin/kernel.bin > bin/$(IMAGE_NAME).img
-
-run:
-	qemu-system-i386 -drive format=raw,file=bin/$(IMAGE_NAME).img
 
 clean:
 	rm -rf bin
+
+%.o: %.c
+	$(CC) -o $@ -c $< $(CCFLAGS)
+
+%.o: %.S
+	$(AS) $(ASFLAGS) -o $@ $< 
+
+bootsect: $(BOOTSECT_OBJS)
+	$(LD) -m elf_i386 -o bin/bootsect.bin $^ -Ttext 0x7C00 --oformat=binary
+
+kernel: $(KERNEL_OBJS)
+	$(LD) -m elf_i386 -o bin/kernel.bin $^ -Tsrc/link.ld
+
+hdd: bootsect kernel
+	dd if=/dev/zero of=upOS.hdd bs=512 count=2880
+	dd if=bin/bootsect.bin of=upOS.hdd conv=notrunc bs=512 seek=0 count=1
+	dd if=bin/kernel.bin of=upOS.hdd conv=notrunc bs=512 seek=1 count=2048
+
+#build:
+#	$(AS) $(ASFLAGS) -o bin/bootsect.bin src/bootloader/stage0.S
+#	$(AS) $(ASFLAGS) -o bin/kernel.bin src/kernel/entry.S
+
+#link:
+#	cat bin/bootsect.bin bin/kernel.bin > bin/$(IMAGE_NAME).img
