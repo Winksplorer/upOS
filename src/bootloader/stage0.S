@@ -85,7 +85,7 @@ PModeMain:
     ;mov al, [0x10000]
     ;out 0xe9, al
 
-    jmp 0x10010
+    jmp 0x10:0x10000
     ;jmp $
     ;jmp 0x10:0x1000
 

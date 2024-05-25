@@ -2,7 +2,9 @@
 ; Licensed under the MIT license.
 
 [BITS 32]
-[global _start]
+
+mov al, 'C'
+out 0xe9, al
 
 ;db 0xDE, 0xAD, 0xBE, 0xEF
 ;db 'Hello, world', 0
