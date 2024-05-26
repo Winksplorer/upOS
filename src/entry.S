@@ -14,8 +14,8 @@ _start:
 
     mov esp, stackTop
 
-    mov al, 'A'
-    out 0xe9, al
+    ;mov al, 'A'
+    ;out 0xe9, al
 
     jmp _main
 

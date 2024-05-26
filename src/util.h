@@ -40,6 +40,7 @@ void dputs(const char* s) {
     for (;;) {
         if (s[i] == '\0') break;
         outb(0xe9, s[i]);
+        *(char*)0xB8000 = s[i];
         i++;
     }
 }
