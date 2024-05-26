@@ -39,6 +39,11 @@ _start:
     ; Disable interrupts
     cli
 
+    ; Disable NMIs
+    in al, 0x70
+    or al, 0x80
+    out 0x70, al
+
     ; Enable the A20 Line
     in al, 0x92
     or al, 2
@@ -48,13 +53,13 @@ _start:
     lgdt [gdt]
 
     ; Set PE (Protection Enable) bit in CR0 (Control Register 0)
-    mov eax, cr0 
+    mov eax, cr0
     or al, 1
     mov cr0, eax
 
     ; Perform far jump to selector 08h (offset into GDT, pointing at a 32bit PM code segment descriptor) 
     ; to load CS with proper PM32 descriptor)
-    jmp 0x10:PModeMain
+    jmp 0x8:PModeMain
 
 disk_error:
     mov si, disk_error_str
@@ -80,6 +85,13 @@ disk_error_str: db 'Error reading disk. System halted.', 0x0D, 0x0A, 0x00
 [BITS 32]
 
 PModeMain:
+    mov ax, 0x10
+    mov ds, ax
+    mov es, ax
+    mov ss, ax
+    mov fs, ax
+    mov gs, ax
+
     jmp 0x10000
 
 times 510 - ($ - $$) db 0

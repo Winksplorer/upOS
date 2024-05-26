@@ -9,6 +9,12 @@ _start:
     mov byte [0xB8000], 'A' ; trying to remember here
     mov byte [0xB8001], 0x0F ; trying to remember here
 
+    mov esp, stackTop
+
     mov al, 'A'
     out 0xe9, al
     jmp $
+
+stackBottom:
+times 4096 db 0
+stackTop:
