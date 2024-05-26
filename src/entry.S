@@ -17,8 +17,7 @@ _start:
     mov al, 'A'
     out 0xe9, al
 
-    call _main
-    jmp $
+    jmp _main
 
 section .data
 

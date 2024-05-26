@@ -11,6 +11,7 @@ CCFLAGS = \
 	-m32 \
 	-std=c99 \
 	-Wall \
+	-I src \
 	-Wextra \
 	-fno-pie \
 	-nostdlib \
@@ -21,14 +22,14 @@ ASFLAGS = \
 	-f elf
 
 BOOTSECT_SRCS = \
-	src/bootloader/stage0.S
+	src/stage0.S
 
-BOOTSECT_OBJS = $(BOOTSECT_SRCS:.S=.o)
+BOOTSECT_OBJS = $(addprefix bin/, $(notdir $(BOOTSECT_SRCS:.S=.o)))
 
-KERNEL_C_SRCS = $(wildcard src/kernel/*.c)
-KERNEL_S_SRCS = $(filter-out $(BOOTSECT_SRCS), $(wildcard src/kernel/*.S))
+KERNEL_C_SRCS = $(wildcard src/*.c)
+KERNEL_S_SRCS = $(filter-out $(BOOTSECT_SRCS), $(wildcard src/*.S))
 
-KERNEL_OBJS = $(KERNEL_C_SRCS:.c=.o) $(KERNEL_S_SRCS:.S=.o)
+KERNEL_OBJS = $(addprefix bin/, $(notdir $(KERNEL_C_SRCS:.c=.o) $(KERNEL_S_SRCS:.S=.o)))
 
 IMAGE_NAME = upOS
 
@@ -43,20 +44,20 @@ dirs:
 clean: clean_objs
 	rm -rf bin
 
-clean_objs: $(BOOTSECT_OBJS) $(KERNEL_OBJS)
-	rm $^
+clean_objs:
+	rm -f $(BOOTSECT_OBJS) $(KERNEL_OBJS)
 
-%.o: %.c
+bin/%.o: src/%.S
+	$(AS) $(ASFLAGS) -o $@ $<
+
+bin/%.o: src/%.c
 	$(CC) -o $@ -c $< $(CCFLAGS)
-
-%.o: %.S
-	$(AS) $(ASFLAGS) -o $@ $< 
 
 bootsect: $(BOOTSECT_OBJS)
 	$(LD) -m elf_i386 -o bin/bootsect.bin $^ -Ttext 0x7C00 --oformat=binary
 
 kernel: $(KERNEL_OBJS)
-	$(LD) -m elf_i386 -nostdlib -o bin/kernel.bin $^ -Tsrc/linker.ld
+	$(LD) -m elf_i386 -nostdlib -o bin/kernel.bin $^ -Tsrc/link.ld
 
 hdd: bootsect kernel
 	dd if=/dev/zero of=upOS.hdd bs=512 count=2880
