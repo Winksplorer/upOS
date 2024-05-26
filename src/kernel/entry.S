@@ -2,8 +2,11 @@
 ; Licensed under the MIT license.
 
 [BITS 32]
+
+section .text.prologue
+
+[extern _main]
 [global _start]
-[global stackBottom]
     
 _start:
     mov byte [0xB8000], 'A' ; trying to remember here
@@ -13,8 +16,12 @@ _start:
 
     mov al, 'A'
     out 0xe9, al
+
+    call _main
     jmp $
 
-stackBottom:
+section .data
+
+global stackBottom:
 times 4096 db 0
 stackTop:
