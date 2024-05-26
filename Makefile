@@ -36,7 +36,7 @@ IMAGE_NAME = upOS
 all: dirs hdd run
 
 run:
-	qemu-system-i386 -debugcon stdio -drive file=upOS.hdd,format=raw
+	qemu-system-i386 -debugcon stdio -drive file=upOS.hdd,format=raw | xxd
 
 dirs:
 	mkdir -p bin

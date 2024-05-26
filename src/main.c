@@ -1,5 +1,7 @@
 #include <util.h>
 
+const char test[] = "Welcome to upOS!\0";
+
 void _main() {
     *(char*)0xB8000 = 'B';
     *(char*)0xB8001 = 0x0A;
@@ -9,9 +11,8 @@ void _main() {
 
     //outb(0xe9, test[0]);
 
-    const char test[] = "Welcome to upOS!\0";
-
-    dputs(test);
+    serial_puts(test);
+    //dputs(*test);
 
     for (;;);
 }
