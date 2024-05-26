@@ -35,7 +35,7 @@ int strlen(const char* str) {
     return i;
 }
 
-void dputs_alt(const char* s) {
+void dputs(const char* s) {
     int i = 0;
     for (;;) {
         if (s[i] == '\0') break;
