@@ -2,7 +2,7 @@
 ; Licensed under the MIT license.
 
 gdt:
-    dw .size - 1 + 8  ; GDT size
+    dw .size - 1      ; GDT size
     dd .start - 8     ; GDT start address
 
     .start:

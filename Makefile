@@ -62,10 +62,3 @@ hdd: bootsect kernel
 	dd if=/dev/zero of=upOS.hdd bs=512 count=2880
 	dd if=bin/bootsect.bin of=upOS.hdd conv=notrunc bs=512 seek=0 count=1
 	dd if=bin/kernel.bin of=upOS.hdd conv=notrunc bs=512 seek=1 count=2048
-
-#build:
-#	$(AS) $(ASFLAGS) -o bin/bootsect.bin src/bootloader/stage0.S
-#	$(AS) $(ASFLAGS) -o bin/kernel.bin src/kernel/entry.S
-
-#link:
-#	cat bin/bootsect.bin bin/kernel.bin > bin/$(IMAGE_NAME).img

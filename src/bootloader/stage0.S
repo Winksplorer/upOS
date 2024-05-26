@@ -1,10 +1,7 @@
 ; src/bootloader/stage0.S: upOS bootloader
 ; Licensed under the MIT license.
 
-; ===== this code is now decommisioned and is not in use because of cursed data between the bootloader and kernel. ===== ;
-
 [BITS 16]
-[extern PModeMain]
 [global _start]
 
 jmp _start
@@ -12,26 +9,35 @@ jmp _start
 %include "src/bootloader/gdt.S"
 
 _start:
-    ; Load the kernel from disk
-    mov al, 1      ; sectors
-    mov ah, 2      ; function
-    mov ch, 0      ; cylinder
-    mov cl, 2      ; sector
-    mov dh, 0      ; head
-    xor bx, bx
-    mov es, bx   
-    mov bx, 0x1000 ; extended segment
-    int 13h
-    jc .diskError
-
-    ; Disable interrupts, including NMIs
     cli
-    mov dx, 0x70
-    in al, dx
-    or al, 0x80
-    out dx, al
-    mov dx, 0x71
-    in al, dx
+
+    ; segment setup
+    xor ax, ax
+    mov ds, ax
+    mov es, ax
+    mov ss, ax
+
+    ; stack
+    mov sp, 0x3000
+
+    sti
+
+    mov si, welcome_str
+    call print_string
+
+    ; Load the kernel from disk
+    mov ah, 2
+    mov al, 1
+    mov cx, 2
+    mov dh, 0
+    mov dl, 80h
+    mov bx, 0x1000
+    mov es, bx
+    int 13h
+    jc disk_error
+
+    ; Disable interrupts
+    cli
 
     ; Enable the A20 Line
     in al, 0x92
@@ -40,13 +46,6 @@ _start:
 
     ; Load the GDT
     lgdt [gdt]
-
-    mov ax, 0x10 ; 32-bit code data segment
-    mov ds, ax
-    mov es, ax
-    mov fs, ax
-    mov gs, ax
-    mov ss, ax
 
     ; Set PE (Protection Enable) bit in CR0 (Control Register 0)
     mov eax, cr0 
@@ -57,10 +56,11 @@ _start:
     ; to load CS with proper PM32 descriptor)
     jmp 0x10:PModeMain
 
-    .diskError:
-        mov si, disk_error_msg
-        call print_string
-        jmp $
+disk_error:
+    mov si, disk_error_str
+    call print_string
+
+    jmp $ ; halt the cpu
 
 print_string:
     lodsb
@@ -74,20 +74,13 @@ print_string:
 
     .done: ret
 
-disk_error_msg: db 'Error reading disk. System halted.', 0
+welcome_str: db "Starting upOS...", 0x0D, 0x0A, 0x00
+disk_error_str: db 'Error reading disk. System halted.', 0x0D, 0x0A, 0x00
 
 [BITS 32]
-    
+
 PModeMain:
-    mov al, 'A'
-    out 0xe9, al
-
-    ;mov al, [0x10000]
-    ;out 0xe9, al
-
-    jmp 0x10:0x10000
-    ;jmp $
-    ;jmp 0x10:0x1000
+    jmp 0x10000
 
 times 510 - ($ - $$) db 0
 dw 0xAA55
