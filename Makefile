@@ -33,10 +33,10 @@ KERNEL_OBJS = $(addprefix bin/, $(notdir $(KERNEL_C_SRCS:.c=.o) $(KERNEL_S_SRCS:
 
 IMAGE_NAME = upOS
 
-all: dirs hdd run
+all: clean dirs hdd run
 
 run:
-	qemu-system-i386 -debugcon stdio -drive file=upOS.hdd,format=raw | xxd
+	qemu-system-i386 -debugcon stdio -drive file=upOS.hdd,format=raw
 
 dirs:
 	mkdir -p bin

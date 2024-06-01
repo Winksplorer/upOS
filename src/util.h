@@ -31,8 +31,43 @@ static inline void outb(u16 port, u8 data) {
 
 static inline size_t strlen(const char* str) {
     size_t l = 0;
-    while (*str++ != 0) { l++; }
+    while (*str++) { l++; }
     return l;
+}
+
+static void itoa(char *buf, int base, int d) {
+    char *p = buf;
+    char *p1, *p2;
+    unsigned long ud = d;
+    int divisor = 10;
+
+    /* If %d is specified and D is minus, put ‘-’ in the head. */
+    if (base == 'd' && d < 0) {
+        *p++ = '-';
+        buf++;
+        ud = -d;
+    } else if (base == 'x')
+        divisor = 16;
+
+    /* Divide UD by DIVISOR until UD == 0. */
+    do {
+        int remainder = ud % divisor;
+        *p++ = (remainder < 10) ? remainder + '0' : remainder + 'a' - 10;
+    } while (ud /= divisor);
+
+    /* Terminate BUF. */
+    *p = 0;
+
+    /* Reverse BUF. */
+    p1 = buf;
+    p2 = p - 1;
+    while (p1 < p2) {
+        char tmp = *p1;
+        *p1 = *p2;
+        *p2 = tmp;
+        p1++;
+        p2--;
+    }
 }
 
 void dputs(const char* s) {
@@ -45,9 +80,17 @@ void dputs(const char* s) {
     }
 }
 
-void serial_puts(char* str) {
+void serial_puts(const char* str) {
+    char addr[16];
+    char len[16];
+
+    itoa(addr, 'x', (u32)str);
+    itoa(len, 'd', strlen(str));
+
     int i;
-    for (i = 0; i < strlen(str); i++) {
-        outb(0xe9, 'A');
+    for (i = 0; i < strlen(addr); i++) {
+        outb(0xe9, addr[i]);
     }
+
+    outb(0xe9, '\n');
 }

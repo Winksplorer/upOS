@@ -14,13 +14,10 @@ _start:
 
     mov esp, stackTop
 
-    ;mov al, 'A'
-    ;out 0xe9, al
-
     jmp _main
 
-section .data
+section .bss
 
-global stackBottom:
-times 4096 db 0
+stackBottom:
+resb 4096
 stackTop:

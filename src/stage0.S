@@ -25,7 +25,7 @@ _start:
 
     ; Load the kernel from disk
     mov ah, 2
-    mov al, 1
+    mov al, 2 ; number of sectors to load
     mov cx, 2
     mov dh, 0
     mov dl, 80h
