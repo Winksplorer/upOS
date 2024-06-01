@@ -1,12 +1,15 @@
-//#include <util.h>
+#include <util.h>
 
-const char test[] = "Welcome to upOS!\0";
+const char test[] = "Welcome to upOS!";
 
 void _main() {
     //*(char*)0xB8000 = 'C';
     //*(char*)0xB8001 = 0x0A;
 
-    char* hello = test;
+    char hello[strlen(test)];
+    for (int i = 0; i < 5; i++) {
+        hello[i] = test[i];
+    }
 
     *(char*)0xB8000 = hello[0];
     *(char*)0xB8001 = 0x0B;

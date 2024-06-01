@@ -18,6 +18,7 @@ _start:
 
 section .bss
 
+align 16
 stackBottom:
 resb 4096
 stackTop:
